@@ -1,0 +1,13 @@
+* Visualization for PA-X
+
+** Map
+*** TODO Implement Interactive MAP for navigating 
+
+** Timeline
+*** TODO Implement a timeline which displays time, and peace agreements for a single country, dynamically.
+*** TODO Implement single timeline to display a single variable from =wep= for a single country.
+*** TODO timeline to display 
+
+*** TODO add scrollable div:
+[[https://stackoverflow.com/questions/17750430/remove-scroll-bar-from-div][How to hid scrollable bar]]
+[[https://stackoverflow.com/questions/443700/div-with-horizontal-scrolling-only][Make a div with scroll bar]]

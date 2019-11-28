@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PA-X &amp; WEP Dataverse </title>
+    <link href="https://fonts.googleapis.com/css?family=Calistoga|Roboto+Slab&display=swap" rel="stylesheet">
+    <script src="src/js/lib/d3.min.js"></script>
+    <style>
+
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 100px;
+            height: 40px;
+            padding: 2px;
+            font: 18px sans-serif;
+            /*background: rgba(0,0,0,0.3);*/
+            color: black;
+            text-shadow: #ff0006 1px 0 10px;
+            /*border: 0px;*/
+            /*border-radius: 8px;*/
+            pointer-events: none;
+        }
+
+        body {
+
+            background-color: #F3F1E5;
+            /*background-color: #F3F1E5;*/
+            width: 100%;
+            margin-top: 200px; /* TODO: modify page layout */
+        }
+
+        #info {
+            display: block;
+            width: 70%;
+            font: 15px sans-serif;
+            font-family: Arial, sans-serif;
+            margin: 0px auto;
+            height: 40vh;
+        }
+
+        #peaceProcessName {
+            font-family: 'Roboto Slab', serif;
+            font-size: 20px;
+        }
+
+        #agreementTitle {
+            /*font-family: 'Roboto Slab', serif;*/
+            font-family: 'Calistoga', cursive;
+            margin-bottom: 70px;
+            /* TODO: modify page layout */
+        }
+
+        #signedDate {
+            /*font-family: 'Roboto Slab', serif;*/
+        }
+
+        #status {
+            text-transform: capitalize;
+        }
+
+        #agreementType {
+            text-transform: capitalize;
+        }
+
+        #svgContainer {
+            /*background-color: #F3F1E5;*/
+            width: 100%;
+            height: 50vh;
+            /*border: 1px solid #aaa;*/
+            overflow: hidden;
+        }
+
+        #svgWrapper {
+            height: 100%;
+            margin-bottom: -50px; /* maximum width of scrollbar */
+            padding-bottom: 50px; /* maximum width of scrollbar */
+            overflow-y: scroll;
+            overflow-x: scroll;
+        }
+
+        svg {
+            /*height: 100%;*/
+            margin: 0px auto;
+            display: block;
+            /*    overflow-x: hidden;*/
+        /
+        }
+
+        #timeline {
+            font: 1.7em sans-serif;
+            font-weight: 700;
+            stroke: black;
+            stroke-width: 2px;
+
+        }
+
+        #timeline text {
+            fill: black;
+            letter-spacing: 10px;
+            opacity: 0.3;
+        }
+
+        .line {
+            fill: none;
+            /*stroke: #686847;*/
+            stroke-width: 6px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: black;
+            }
+
+            #info {
+                color: white;
+            }
+
+            rect {
+                fill: white;
+            }
+
+            #timeline {
+                fill: red;
+                stroke: white;
+            }
+
+            #timeline text {
+                fill: white;
+                opacity: 0.5;
+            }
+
+            .dot {
+                fill: white;
+            }
+        }
+    </style>
+</head>
+<body>
+<script>
+    // INITIALIZE HTML AND SVG AREA
+
+    let margin = {top: 20, right: 20, bottom: 70, left: 20},
+        width = 6000 - margin.left - margin.right,
+        singleSideHeight = 300 - margin.top - margin.bottom,
+        totalHeight = singleSideHeight * 2;
+    // let width = 400, height = 100;
+
+    // define func for parsing date
+    let paxTimeFormatStr = "%Y/%m/%d";
+    let paxFormatTime = d3.timeFormat("%Y %b %d");
+    let paxParseDate = d3.timeParse(paxTimeFormatStr);
+
+    let wepTimeFormatStr = "%Y";
+    let wepFormatTime = d3.timeFormat(wepTimeFormatStr);
+    let wepParseDate = d3.timeParse(wepTimeFormatStr);
+
+    // set scales for timeline
+    let timelineScale = d3.scaleTime()
+                          .range([0, width]);
+
+    let info = d3.select("body")
+                 .append("div")
+                 .attr("id", "info");
+
+    info.append("h1")
+        .attr("id", "peaceProcessName")
+        .text("");
+
+    info.append("h1")
+        .attr("id", "agreementTitle")
+        .text("");
+
+    info.append("h2")
+        .attr("id", "signedDate")
+        .text("");
+
+    info.append("h2")
+        .attr("id", "status")
+        .text("");
+
+    info.append("h2")
+        .attr("id", "agreementType")
+        .text("");
+
+    // append SVG
+    let svg = d3.select("body")
+                .append("div")
+                .attr("id", "svgContainer")
+        // .style("height", totalHeight + "px")
+                .append("div")
+                .attr("id", "svgWrapper")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", totalHeight + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")");
+
+    // INITIALIZE DATA  ---------------------------------------------------------------------------
+
+    // Note: pax data needs to be sort already
+    let gwno = d3.csv("./data/gwno.csv");
+    let pax = d3.csv("./data/raw/pax_all_agreements_data.csv");
+    let wep = d3.csv("./data/raw/world_economics_politics.csv");
+
+    let agreements;
+    let wepData;
+    let tooltipDiv;
+    let agreementKeys;
+    let filteredLocation;
+
+    wep.then(d => {
+        d.forEach(d => {
+            d.year = wepParseDate(d.year)
+        });
+        wepData = d;
+    });
+
+    pax.then(d => {
+        d.forEach(d => {
+            d.Dat = paxParseDate(d.Dat); // replace date string with processable date objects
+        });
+        agreements = d;
+        timelineScale.domain(d3.extent(d, d => d.Dat));
+        agreementKeys = Object.keys(d[0])
+                              .filter(k => !(['Con', 'Contp', 'PP', 'PPName', 'Reg', 'AgtId', 'Agt', 'Dat', 'Status',
+                                  'Lgt', 'N_characters', 'Agtp', 'Stage', 'StageSub', 'Part', 'ThrdPart', 'OthAgr',
+                                  'Loc1ISO', 'Loc2ISO', 'Loc1GWNO', 'Loc2GWNO',
+                                  'UcdpCon', 'UcdpAgr', 'PamAgr', 'CowWar'].includes(k)));
+        console.log(agreementKeys);
+
+
+        // add pax attribute dropdown list
+        let paxDropdownList = d3.select("body")
+                                .insert("select")
+                                .attr("class", "paxDropdownList")
+                                .on("change", dropdown);
+
+        paxDropdownList.selectAll("option")
+                       .data(agreementKeys)
+                       .enter()
+                       .append("option")
+                       .attr("value", d => d)
+                       .text(d => d);
+
+        function dropdown() {
+            let paxColumn = d3.select(this)
+                              .property('value');
+
+            if (filteredLocation !== []) {
+                d3.selectAll('rect').data(filteredLocation)
+            }
+
+            d3.selectAll("rect")
+              .transition().duration(500)
+              .style("fill", d => {
+                  console.log("FILL!");
+                  let colorv = d[paxColumn];
+                  if (colorv == 0) {
+                      return "#B3C672"
+                  } else if (colorv == 1) {
+                      return "#62A399"
+                  } else if (colorv == 2) {
+                      return "#BE8675"
+                  } else if (colorv == 3) {
+                      return "#993F3B"
+                  }
+              }).attr("height", 90);
+            drawAgreementsOnAxis(gwno);
+        }
+
+        initialize();
+    });
+
+    function initialize() {
+        // draw timeline
+        svg.append("g")
+           .attr("id", "timeline")
+           .attr("transform", "translate(0," + singleSideHeight + ")")
+           .transition()
+           .duration(2000)
+           .call(d3.axisBottom(timelineScale)
+                   .ticks(30))
+           .selectAll("text")
+           .style("text-anchor", "end")
+           .attr("dx", "1em")
+           .attr("dy", "0em")
+           .attr("transform", "rotate(-65)");
+
+        // Define the div for the tooltip
+        tooltipDiv = d3.select("body")
+                       .append("div")
+                       .attr("class", "tooltip")
+                       .style("opacity", 0);
+
+
+    }
+
+
+    function clearOldPlots() {
+        let clearDuration = 1000;
+
+        d3.selectAll(".line")
+          .transition()
+          .duration(clearDuration)
+          .style("opacity", 0)
+          .remove();
+        d3.selectAll(".dot")
+          .transition()
+          .duration(clearDuration)
+          .style("opacity", 0)
+          .remove();
+        d3.selectAll("rect")
+          .transition()
+          .duration(clearDuration)
+          .attr("width", 0)
+          .remove()
+    }
+
+    // generate country selection list
+    gwno.then(data => {
+
+        // add country dropdown list
+        let countryDropdownList = d3.select("body")
+                                    .insert("select")
+                                    .attr("class", "countryDropdownList")
+                                    .on("change", dropdownChange);
+
+        countryDropdownList.selectAll("option")
+                           .data(data)
+                           .enter()
+                           .append("option")
+                           .attr("value", d => d.gwno)
+                           .text(d => d.country);
+
+        function dropdownChange() {
+            let gwno = d3.select(this)
+                         .property('value');
+            clearOldPlots();
+            drawDataLines(gwno, 'gdppc_WDI', true);
+            drawDataLines(gwno, 'gini_WDI', false);
+            drawAgreementsOnAxis(gwno);
+        }
+    });
+
+    function drawDataLines(gwno, column, isTop) {
+
+        let filteredData = wepData.filter(function (d) {
+            if (d["gwno"] == gwno && d[column] !== "") {
+                return d;
+            }
+        });
+
+        let yScale;
+
+        if (isTop) {
+            yScale = d3.scaleLinear()
+                       .range([singleSideHeight, margin.top + 50]);
+        } else {
+            yScale = d3.scaleLinear()
+                       .range([singleSideHeight, totalHeight]);
+        }
+
+        yScale.domain([0, d3.max(filteredData, function (d) {
+            return d[column];
+        })]);
+
+        // draw lines on the timeline ---------------------------------------------------------------
+        let valueLine = d3.line()
+                          .x(d => timelineScale(d.year))
+                          .y(d => yScale(d[column]))
+                          .curve(d3.curveMonotoneX);
+
+        // add lines
+        let path = svg.append("path")
+                      .data([filteredData])
+                      .attr("class", "line")
+                      .attr("d", valueLine)
+                      .style("opacity", 0)
+                      .transition()
+                      .duration(1000)
+                      .style("opacity", 1);
+
+        isTop ? path.style("stroke", "#b06161") : path.style("stroke", "#686847");
+
+
+        let circle = svg.selectAll("circle." + isTop ? "top" : "bottom")
+                        .data(filteredData)
+                        .enter()
+                        .append("circle") // Uses the enter().append() method
+                        .attr("class", "dot") // Assign a class for styling
+                        .attr("cx", d => timelineScale(d.year))
+                        .attr("cy", d => yScale(d[column]))
+                        .attr("r", 5)
+                        .on("mouseover", function (d) {
+                            tooltipDiv.transition()
+                                      .duration(200)
+                                      .style("opacity", .9);
+                            tooltipDiv.html(column + "<br/>" + d[column])
+                                      .style("left", (d3.event.pageX) + "px")
+                                      .style("top", (d3.event.pageY - 28) + "px");
+                        })
+                        .on("mouseout", function (d) {
+                            tooltipDiv.transition()
+                                      .duration(500)
+                                      .style("opacity", 0);
+                        })
+                        .style("opacity", 0)
+                        .transition()
+                        .duration(1000)
+                        .style("opacity", 1);
+
+        // filteredData.forEach(d => {
+        //
+        //     let circle = svg.append("circle") // Uses the enter().append() method
+        //                     .attr("class", "dot") // Assign a class for styling
+        //                     .attr("cx", timelineScale(d.year))
+        //                     .attr("cy", yScale(d[column]))
+        //                     .attr("r", 5);
+        //
+        //     circle.style("opacity", 0)
+        //           .transition()
+        //           .duration(1000)
+        //           .style("opacity", 1);
+        //
+        //     circle.on("mouseover", function (d) {
+        //         tooltipDiv.transition()
+        //                   .duration(200)
+        //                   .style("opacity", .9);
+        //         tooltipDiv.html(d[column])
+        //                   .style("left", (d3.event.pageX) + "px")
+        //                   .style("top", (d3.event.pageY - 28) + "px");
+        //         console.log(d[column]);
+        //     })
+        //           .on("mouseout", function (d) {
+        //               tooltipDiv.transition()
+        //                         .duration(500)
+        //                         .style("opacity", 0);
+        //           });
+        //
+        // });
+
+    }
+
+    function drawAgreementsOnAxis(gwno) {
+        filteredLocation = agreements.filter(function (d) {
+            return d["Loc1GWNO"] == gwno || d["Loc2GWNO"] == gwno;
+        });
+
+        filteredLocation.forEach(d => {
+            let agreementBarWidth = 7;
+            let mouseOutAgreementBarHeight = 50;
+            let mouseOverAgreementBarHeight = 130;
+
+            function peekAgreementInfo() {
+                // TODO: expand timeline
+                // svg.transition().duration(1000).attr("width", 2000);
+                d3.select("#peaceProcessName")
+                  .text(d.PPName);
+
+                d3.select("#agreementTitle")
+                  .text(d.Agt);
+
+                d3.select("#status")
+                  .text(d.Status);
+
+                function formatAgtp(agtp) {
+                    if (agtp === "Inter") {
+                        return "Interstate/interstate conflict"
+                    } else if (agtp === "InterIntra") {
+                        return "Interstate/mixed or intrastate conflict"
+                    } else if (agtp === "Intra") {
+                        return "Intrastate agreement relating to intrastate conflict"
+                    } else if (agtp === "IntraLocal") {
+                        return "intrastate conflict mainly aiming to resolve local issues"
+                    } else {
+                        console.error("Error Agtp")
+                    }
+                }
+
+                d3.select("#agreementType")
+                  .transition()
+                  .duration(1000)
+                  .text(formatAgtp(d.Agtp));
+
+                d3.select("#signedDate")
+                  .html("Signed/Agreed on " + paxFormatTime(d.Dat) + '<sup><a href="https://google.com">*</a></sup>');
+
+                rect.transition()
+                    .duration(200)
+                    .attr("height", mouseOverAgreementBarHeight);
+            }
+
+            function hidAgreementInfo() {
+
+                rect.transition()
+                    .duration(200)
+                    .attr("height", mouseOutAgreementBarHeight);
+            }
+
+            let rect = svg.append("rect")
+                          .on("mouseover", peekAgreementInfo)
+                          .on("mouseout", hidAgreementInfo)
+                          .attr("x", timelineScale(d.Dat))
+                          .attr("y", singleSideHeight - 10)
+                          .style("opacity", 0.5)
+                          .attr("width", agreementBarWidth)
+                          .attr("height", 0);
+
+
+
+            rect.transition()
+                .duration(1000)
+                .attr("height", mouseOutAgreementBarHeight);
+        });
+
+        d3.selectAll("rect")
+          .data(filteredLocation);
+        // console.log(filteredLocation)
+    }
+
+</script>
+</body>
+</html>
