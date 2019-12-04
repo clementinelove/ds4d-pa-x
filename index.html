@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>PA-X &amp; WEP Dataverse </title>
-    <link href="https://fonts.googleapis.com/css?family=Calistoga|Roboto+Slab&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Calistoga|Roboto+Slab|Oxygen+Mono&display=swap"
+          rel="stylesheet">
     <script src="src/js/lib/d3.min.js"></script>
     <style>
 
         div.tooltip {
+            font-family: 'Oxygen Mono', monospace;
             position: absolute;
-            text-align: center;
-            width: 100px;
-            height: 40px;
-            padding: 2px;
-            font: 18px sans-serif;
-            /*background: rgba(0,0,0,0.3);*/
-            color: black;
-            text-shadow: #ff0006 1px 0 10px;
-            /*border: 0px;*/
+            text-align: left;
+            /*width: 100px;*/
+            /*height: 40px;*/
+            padding: 10px;
+            /*font: 18px sans-serif;*/
+            background: rgba(0, 0, 0, 1);
+            color: white;
+            /*text-shadow: #fff 1px 0 10px;*/
+            border: 0px;
             /*border-radius: 8px;*/
             pointer-events: none;
         }
@@ -31,6 +33,7 @@
         }
 
         #info {
+
             display: block;
             width: 70%;
             font: 15px sans-serif;
@@ -75,7 +78,7 @@
             height: 100%;
             margin-bottom: -50px; /* maximum width of scrollbar */
             padding-bottom: 50px; /* maximum width of scrollbar */
-            overflow-y: scroll;
+            overflow-y: hidden;
             overflow-x: scroll;
         }
 
@@ -204,38 +207,39 @@
     let pax = d3.csv("./data/raw/pax_all_agreements_data.csv");
     let wep = d3.csv("./data/raw/world_economics_politics.csv");
 
-    let agreements;
-    let wepData;
-    let tooltipDiv;
-    let agreementKeys;
-    let filteredLocation;
 
-    wep.then(d => {
-        d.forEach(d => {
-            d.year = wepParseDate(d.year)
-        });
-        wepData = d;
-    });
+    let tooltipDiv;
+
+    let wepData;
+    let wepKeys;
+
+    let agreements;
+    let agreementKeys;
+
+    const LinePosition = {
+        TOP: "top",
+        BOTTOM: "bottom",
+    };
 
     pax.then(d => {
+        const nonLinearFields = ['Con', 'Contp', 'PP', 'PPName', 'Reg', 'AgtId', 'Agt', 'Dat', 'Status',
+            'Lgt', 'N_characters', 'Agtp', 'Stage', 'StageSub', 'Part', 'ThrdPart', 'OthAgr',
+            'Loc1ISO', 'Loc2ISO', 'Loc1GWNO', 'Loc2GWNO',
+            'UcdpCon', 'UcdpAgr', 'PamAgr', 'CowWar'];
+
         d.forEach(d => {
             d.Dat = paxParseDate(d.Dat); // replace date string with processable date objects
         });
         agreements = d;
         timelineScale.domain(d3.extent(d, d => d.Dat));
         agreementKeys = Object.keys(d[0])
-                              .filter(k => !(['Con', 'Contp', 'PP', 'PPName', 'Reg', 'AgtId', 'Agt', 'Dat', 'Status',
-                                  'Lgt', 'N_characters', 'Agtp', 'Stage', 'StageSub', 'Part', 'ThrdPart', 'OthAgr',
-                                  'Loc1ISO', 'Loc2ISO', 'Loc1GWNO', 'Loc2GWNO',
-                                  'UcdpCon', 'UcdpAgr', 'PamAgr', 'CowWar'].includes(k)));
-        console.log(agreementKeys);
-
+                              .filter(col => !(nonLinearFields.includes(col)));
 
         // add pax attribute dropdown list
         let paxDropdownList = d3.select("body")
                                 .insert("select")
-                                .attr("class", "paxDropdownList")
-                                .on("change", dropdown);
+                                .attr("id", "paxDropdownList")
+                                .on("change", paxColDropdownChanged);
 
         paxDropdownList.selectAll("option")
                        .data(agreementKeys)
@@ -244,78 +248,171 @@
                        .attr("value", d => d)
                        .text(d => d);
 
-        function dropdown() {
-            let paxColumn = d3.select(this)
-                              .property('value');
+        function paxColDropdownChanged() {
 
-            if (filteredLocation !== []) {
-                d3.selectAll('rect').data(filteredLocation)
-            }
+            const SELECTED_PAX_COL = getPAXValue();
+            const GWNO_CODE = getGWNOValue();
 
-            d3.selectAll("rect")
-              .transition().duration(500)
+            let filteredAgreements = filterAgreementsByGWNO(agreements, GWNO_CODE);
+            //
+            // d3.selectAll('rect')
+            //   .data(filteredAgreements);
+
+            d3.selectAll(".agreementMark")
+              .data(filteredAgreements)
+              .transition()
+              .duration(500)
               .style("fill", d => {
-                  console.log("FILL!");
-                  let colorv = d[paxColumn];
-                  if (colorv == 0) {
-                      return "#B3C672"
-                  } else if (colorv == 1) {
+                  let colorValue = d[SELECTED_PAX_COL];
+                  if (colorValue == 0) {
+                      return "rgba(124,128,125,0.66)"
+                  } else if (colorValue == 1) {
                       return "#62A399"
-                  } else if (colorv == 2) {
+                  } else if (colorValue == 2) {
                       return "#BE8675"
-                  } else if (colorv == 3) {
+                  } else if (colorValue == 3) {
                       return "#993F3B"
                   }
-              }).attr("height", 90);
-            drawAgreementsOnAxis(gwno);
+              })
+              .attr("height", 90);
+        }
+
+        /**
+         *  Initialize the time line and circle tooltips.
+         *
+         */
+        function initialize() {
+            // draw timeline
+            svg.append("g")
+               .attr("id", "timeline")
+               .attr("transform", "translate(0," + singleSideHeight + ")")
+               .transition()
+               .duration(2000)
+               .call(d3.axisBottom(timelineScale)
+                       .ticks(30))
+               .selectAll("text")
+               .style("text-anchor", "end")
+               .attr("dx", "1em")
+               .attr("dy", "0em")
+               .attr("transform", "rotate(-65)");
+
+            // Define the div for the tooltip
+            tooltipDiv = d3.select("body")
+                           .append("div")
+                           .attr("class", "tooltip")
+                           .style("opacity", 0);
         }
 
         initialize();
+        drawAgreementsOnAxis(filterAgreementsByGWNO(agreements, getGWNOValue()));
+        initializeWEP();
     });
 
-    function initialize() {
-        // draw timeline
-        svg.append("g")
-           .attr("id", "timeline")
-           .attr("transform", "translate(0," + singleSideHeight + ")")
-           .transition()
-           .duration(2000)
-           .call(d3.axisBottom(timelineScale)
-                   .ticks(30))
-           .selectAll("text")
-           .style("text-anchor", "end")
-           .attr("dx", "1em")
-           .attr("dy", "0em")
-           .attr("transform", "rotate(-65)");
+    function initializeWEP() {
+        const nonLinearFields = ['country', 'year', 'gwno', 'ccode', 'ifscode', 'ifs', 'gwabbrev']
+        wep.then(d => {
+            d.forEach(row => {
+                row.year = wepParseDate(row.year);
+                Object.keys(row)
+                      .filter(k => !(nonLinearFields.includes(k)))
+                      .forEach(key => {
+                          row[key] = parseFloat(row[key]);
+                      })
+            });
+            wepData = d;
+            wepKeys = Object.keys(d[0])
+                            .filter(col => !(nonLinearFields.includes(col)));
 
-        // Define the div for the tooltip
-        tooltipDiv = d3.select("body")
-                       .append("div")
-                       .attr("class", "tooltip")
-                       .style("opacity", 0);
+            defineDataColSelectionDropdownList(LinePosition.TOP);
+            defineDataColSelectionDropdownList(LinePosition.BOTTOM);
+
+            drawDataLine(getGWNOValue(), getWEPColValue(LinePosition.TOP), LinePosition.TOP);
+            drawDataLine(getGWNOValue(), getWEPColValue(LinePosition.BOTTOM), LinePosition.BOTTOM);
+        });
+
+        function defineDataColSelectionDropdownList(pos) {
+            // add wep attribute dropdown list
+            let dropdownList = d3.select("body")
+                                 .insert("select")
+                                 .attr("class", "dataLineDropdownList " + pos)
+                                 .on("change", () => {
+                                     clearLinePlotsByPosition(pos);
+                                     console.log("CLEAR: " + pos);
+                                     drawDataLine(getGWNOValue(), getWEPColValue(pos), pos);
+                                     console.log("DRAW: " + pos);
+                                 });
+
+            dropdownList.selectAll("option")
+                        .data(wepKeys)
+                        .enter()
+                        .append("option")
+                        .attr("value", d => d)
+                        .text(d => d);
+        }
+    };
 
 
+    /**
+     * Clear all current plots except timeline. This including all the WEP data lines,
+     * all the shapes that mark the WEP data points
+     * and all the shapes that mark the peace agreements on the timeline.
+     *
+     */
+    const CLEAR_DURATION = 1000;
+
+    function clearAllPlotsExceptTimeline() {
+        clearAllLinePlots();
+        clearAllAgreementMarks();
     }
 
-
-    function clearOldPlots() {
-        let clearDuration = 1000;
-
+    function clearAllLinePlots() {
         d3.selectAll(".line")
           .transition()
-          .duration(clearDuration)
+          .duration(CLEAR_DURATION)
           .style("opacity", 0)
           .remove();
         d3.selectAll(".dot")
           .transition()
-          .duration(clearDuration)
+          .duration(CLEAR_DURATION)
           .style("opacity", 0)
           .remove();
-        d3.selectAll("rect")
+    }
+
+    function clearLinePlotsByPosition(pos) {
+        d3.selectAll(".line." + pos)
           .transition()
-          .duration(clearDuration)
+          .duration(CLEAR_DURATION)
+          .style("opacity", 0)
+          .remove();
+        d3.selectAll(".dot." + pos)
+          .transition()
+          .duration(CLEAR_DURATION)
+          .style("opacity", 0)
+          .remove();
+        console.log("C;")
+    }
+
+    function clearAllAgreementMarks() {
+        d3.selectAll(".agreementMark")
+          .transition()
+          .duration(CLEAR_DURATION)
           .attr("width", 0)
           .remove()
+    }
+
+    function getGWNOValue() {
+        return d3.select("#countryDropdownList")
+                 .property('value');
+    }
+
+    function getPAXValue() {
+        return d3.select("#paxDropdownList")
+                 .property('value');
+    }
+
+    function getWEPColValue(pos) {
+        return d3.select(".dataLineDropdownList." + pos)
+                 .property('value');
     }
 
     // generate country selection list
@@ -324,8 +421,9 @@
         // add country dropdown list
         let countryDropdownList = d3.select("body")
                                     .insert("select")
+                                    .attr("id", "countryDropdownList")
                                     .attr("class", "countryDropdownList")
-                                    .on("change", dropdownChange);
+                                    .on("change", GWNOCodeDropdownChange);
 
         countryDropdownList.selectAll("option")
                            .data(data)
@@ -334,121 +432,142 @@
                            .attr("value", d => d.gwno)
                            .text(d => d.country);
 
-        function dropdownChange() {
-            let gwno = d3.select(this)
-                         .property('value');
-            clearOldPlots();
-            drawDataLines(gwno, 'gdppc_WDI', true);
-            drawDataLines(gwno, 'gini_WDI', false);
-            drawAgreementsOnAxis(gwno);
+        function GWNOCodeDropdownChange() {
+            let GWNO_CODE = getGWNOValue();
+
+            let filteredAgreements = filterAgreementsByGWNO(agreements, GWNO_CODE);
+
+            clearAllPlotsExceptTimeline();
+            drawAgreementsOnAxis(filteredAgreements, GWNO_CODE);
+            drawDataLine(GWNO_CODE, getWEPColValue(LinePosition.TOP), LinePosition.TOP);
+            drawDataLine(GWNO_CODE, getWEPColValue(LinePosition.BOTTOM), LinePosition.BOTTOM);
         }
     });
 
-    function drawDataLines(gwno, column, isTop) {
+    // TODO: change `pos` to position based object info, which is adaptive with the timeline
+    /**
+     * Draw WEP data line on the specified position `pos` argument
+     * @param {number} gwnoCode - the gwno code for the selected wep data
+     * @param {string} col - the specified column to draw
+     * @param {LinePosition} pos - either "top" or "bottom"
+     */
+    function drawDataLine(gwnoCode, col, pos) {
 
         let filteredData = wepData.filter(function (d) {
-            if (d["gwno"] == gwno && d[column] !== "") {
+            if (d["gwno"] == gwnoCode && (d[col] !== "") && !isNaN(d[col])) {
                 return d;
             }
         });
 
+        if (filteredData.length === 0) {
+            console.log("No data for column " + col);
+            // TODO: show no data found info in the user interface
+        }
+
         let yScale;
 
-        if (isTop) {
+        if (pos === LinePosition.TOP) {
             yScale = d3.scaleLinear()
                        .range([singleSideHeight, margin.top + 50]);
-        } else {
+        } else if (pos === LinePosition.BOTTOM) {
             yScale = d3.scaleLinear()
                        .range([singleSideHeight, totalHeight]);
+        } else {
+            console.error("Invalid Position argument:" + pos)
         }
 
         yScale.domain([0, d3.max(filteredData, function (d) {
-            return d[column];
+            return d[col];
         })]);
 
         // draw lines on the timeline ---------------------------------------------------------------
         let valueLine = d3.line()
-                          .x(d => timelineScale(d.year))
-                          .y(d => yScale(d[column]))
+                          .x(d => {
+                              return timelineScale(d.year)
+                          })
+                          .y(d => {
+                              return yScale(d[col])
+                          })
                           .curve(d3.curveMonotoneX);
 
         // add lines
         let path = svg.append("path")
                       .data([filteredData])
-                      .attr("class", "line")
+                      .attr("class", "line " + pos)
                       .attr("d", valueLine)
                       .style("opacity", 0)
                       .transition()
                       .duration(1000)
                       .style("opacity", 1);
 
-        isTop ? path.style("stroke", "#b06161") : path.style("stroke", "#686847");
+        if (pos === LinePosition.TOP) {
+            path.style("stroke", "#b06161")
+        } else if (pos === LinePosition.BOTTOM) {
+            path.style("stroke", "#686847");
+        } else {
+            console.error("Invalid Position argument")
+        }
 
+        // create interactive circles
 
-        let circle = svg.selectAll("circle." + isTop ? "top" : "bottom")
-                        .data(filteredData)
-                        .enter()
-                        .append("circle") // Uses the enter().append() method
-                        .attr("class", "dot") // Assign a class for styling
-                        .attr("cx", d => timelineScale(d.year))
-                        .attr("cy", d => yScale(d[column]))
-                        .attr("r", 5)
-                        .on("mouseover", function (d) {
-                            tooltipDiv.transition()
-                                      .duration(200)
-                                      .style("opacity", .9);
-                            tooltipDiv.html(column + "<br/>" + d[column])
-                                      .style("left", (d3.event.pageX) + "px")
-                                      .style("top", (d3.event.pageY - 28) + "px");
-                        })
-                        .on("mouseout", function (d) {
-                            tooltipDiv.transition()
-                                      .duration(500)
-                                      .style("opacity", 0);
-                        })
-                        .style("opacity", 0)
-                        .transition()
-                        .duration(1000)
-                        .style("opacity", 1);
+        const MOUSE_OUT_CIRCLE_RADIUS = 5;
+        const MOUSE_OVER_CIRCLE_RADIUS = 15;
 
-        // filteredData.forEach(d => {
-        //
-        //     let circle = svg.append("circle") // Uses the enter().append() method
-        //                     .attr("class", "dot") // Assign a class for styling
-        //                     .attr("cx", timelineScale(d.year))
-        //                     .attr("cy", yScale(d[column]))
-        //                     .attr("r", 5);
-        //
-        //     circle.style("opacity", 0)
-        //           .transition()
-        //           .duration(1000)
-        //           .style("opacity", 1);
-        //
-        //     circle.on("mouseover", function (d) {
-        //         tooltipDiv.transition()
-        //                   .duration(200)
-        //                   .style("opacity", .9);
-        //         tooltipDiv.html(d[column])
-        //                   .style("left", (d3.event.pageX) + "px")
-        //                   .style("top", (d3.event.pageY - 28) + "px");
-        //         console.log(d[column]);
-        //     })
-        //           .on("mouseout", function (d) {
-        //               tooltipDiv.transition()
-        //                         .duration(500)
-        //                         .style("opacity", 0);
-        //           });
-        //
-        // });
+        let circles = svg.selectAll(".newdot." + pos)
+                         .data(filteredData)
+                         .enter()
+                         .append("circle") // Uses the enter().append() method
+                         .attr("class", "dot " + pos) // Assign a class for styling
+                         .attr("cx", d => timelineScale(d.year))
+                         .attr("cy", d => yScale(d[col]))
+                         .attr("r", MOUSE_OUT_CIRCLE_RADIUS)
+                         .on("mouseover", function (d) {
+                             d3.select(this)
+                               .transition()
+                               .duration(500)
+                               .style("opacity", .2)
+                               .style("fill", "white")
+                               .attr("r", MOUSE_OUT_CIRCLE_RADIUS);
+                             tooltipDiv.transition()
+                                       .duration(200)
+                                       .style("opacity", .9);
+                             tooltipDiv.html(
+                                 "<h6 class='title'>"
+                                 + wepFormatTime(d.year)
+                                 + "</h6>"
+                                 + " "
+                                 + col
+                                 + "<br/>"
+                                 + d[col])
+                                       .style("left", (d3.event.pageX) + "px")
+                                       .style("top", (d3.event.pageY - 28) + "px");
+                         })
+                         .on("mouseout", function (d) {
+                             d3.select(this)
+                               .transition()
+                               .duration(500)
+                               .style("opacity", 1)
+                               .attr("r", MOUSE_OUT_CIRCLE_RADIUS)
+                               .style("fill", "black");
+                             tooltipDiv.transition()
+                                       .duration(500)
+                                       .style("opacity", 0);
+                         })
+                         .style("opacity", 0)
+                         .transition()
+                         .duration(1000)
+                         .style("opacity", 1);
 
     }
 
-    function drawAgreementsOnAxis(gwno) {
-        filteredLocation = agreements.filter(function (d) {
+    function filterAgreementsByGWNO(agreements, gwno) {
+        return agreements.filter(function (d) {
             return d["Loc1GWNO"] == gwno || d["Loc2GWNO"] == gwno;
         });
+    }
 
-        filteredLocation.forEach(d => {
+    function drawAgreementsOnAxis(agreementsToDraw) {
+        agreementsToDraw.forEach(d => {
             let agreementBarWidth = 7;
             let mouseOutAgreementBarHeight = 50;
             let mouseOverAgreementBarHeight = 130;
@@ -500,6 +619,7 @@
             }
 
             let rect = svg.append("rect")
+                          .attr("class", "agreementMark")
                           .on("mouseover", peekAgreementInfo)
                           .on("mouseout", hidAgreementInfo)
                           .attr("x", timelineScale(d.Dat))
@@ -508,16 +628,13 @@
                           .attr("width", agreementBarWidth)
                           .attr("height", 0);
 
-
-
             rect.transition()
                 .duration(1000)
                 .attr("height", mouseOutAgreementBarHeight);
         });
 
-        d3.selectAll("rect")
-          .data(filteredLocation);
-        // console.log(filteredLocation)
+        // d3.selectAll("rect")
+        //   .data(agreementsToDraw);
     }
 
 </script>
