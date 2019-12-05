@@ -23,7 +23,6 @@ body {
 }
 
 #info {
-
     display: block;
     width: 70%;
     font: 15px sans-serif;
@@ -33,15 +32,25 @@ body {
 }
 
 #peaceProcessName {
-    font-family: 'Roboto Slab', serif;
-    font-size: 20px;
+    font-family: 'Nanum Gothic', sans-serif;
+    letter-spacing: 10px;
+    /*font-family: 'Roboto Slab', serif;*/
+    text-transform: uppercase;
+    font-size: 2vh;
 }
 
 #agreementTitle {
     /*font-family: 'Roboto Slab', serif;*/
     font-family: 'Calistoga', cursive;
-    margin-bottom: 70px;
+    font-size: 4vh;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
     /* TODO: modify page layout */
+}
+
+#info h2 {
+    font-family: 'Noto Serif', serif;
+    font-size: 2vh;
 }
 
 #signedDate {
@@ -59,7 +68,7 @@ body {
 #svgContainer {
     /*background-color: #F3F1E5;*/
     width: 100%;
-    height: 50vh;
+    /*height: 50vh;*/
     /*border: 1px solid #aaa;*/
     overflow: hidden;
 }
@@ -73,6 +82,7 @@ body {
 }
 
 svg {
+    z-index: 1;
     /*height: 100%;*/
     margin: 0px auto;
     display: block;
@@ -81,17 +91,25 @@ svg {
 }
 
 #timeline {
-    font: 1.7em sans-serif;
-    font-weight: 700;
-    stroke: black;
-    stroke-width: 2px;
 
 }
 
 #timeline text {
-    fill: black;
-    letter-spacing: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 3vh;
     opacity: 0.3;
+    z-index: 1;
+    pointer-events: none;
+    /*font-weight: 700;*/
+    /*stroke: black;*/
+    /*stroke-width: 2px;*/
+    /*fill: black;*/
+    /*letter-spacing: 10px;*/
+
+}
+
+.agreementMark {
+    z-index: 3;
 }
 
 .line {
