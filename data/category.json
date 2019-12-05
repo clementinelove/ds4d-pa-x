@@ -1,0 +1,130 @@
+{
+  "Groups": {
+    "GCh": {
+      "meaning": "Children/Youth",
+      "type": "level"
+    },
+    "GDis": {
+      "meaning": "Disabled persons",
+      "type": "level"
+    },
+    "GAge": {
+      "meaning": "Elderly/Age",
+      "type": "level"
+    },
+    "GMig": {
+      "meaning": "Migrant workers",
+      "type": "level"
+    },
+    "GRa": {
+      "meaning": "Racial/ethnic/national group",
+      "type": "level"
+    },
+    "GRe": {
+      "meaning": "Religious groups",
+      "type": "level"
+    },
+    "GInd": {
+      "meaning": "Indigenous people",
+      "type": "level"
+    },
+    "GOth": {
+      "meaning": "Other groups",
+      "type": "level"
+    },
+    "GRef": {
+      "meaning": "Refugees/displaced persons",
+      "type": "level"
+    },
+    "GSoc": {
+      "meaning": "Social Class",
+      "type": "level"
+    }
+  },
+  "Gender": {
+    "GeWom": {
+      "meaning": "Woman, girls and gender",
+      "type": "binary"
+    },
+    "GeMe": {
+      "meaning": "Men and Boys",
+      "type": "binary"
+    },
+    "GeFa": {
+      "meaning": "Family",
+      "type": "bianry"
+    }
+  },
+  "State definition": {
+    "StDef": {
+      "meaning": "State definition",
+      "type": "binary"
+    }
+  },
+  "Goverence": {
+    "Pol": {
+      "meaning": "Political Institutions(new or reformed)",
+      "type": "level"
+    },
+    "ConRen": {
+      "meaning": "Constitutional renewal/affirmation",
+      "type": "level"
+    },
+    "Cons": {
+      "meaning": "Constitutional reform/making",
+      "type": "level"
+    },
+    "Ele": {
+      "meaning": "Elections",
+      "type": "level"
+    },
+    "ElecComm": {
+      "meaning": "Electoral Commission",
+      "type": "level"
+    },
+    "PolPar": {
+      "meaning": "Political parties reform",
+      "type": "level"
+    },
+    "Civso": {
+      "meaning": "Civil Society",
+      "type": "binary"
+    },
+    "Tral": {
+      "meaning": "Traditional/Religious Leaders",
+      "type": "binary"
+    },
+    "Pubad": {
+      "meaning": "Public Administration(Civil Service)",
+      "type": "level"
+    }
+  },
+  "Powersharing": {
+    "Polps": {
+      "meaning": "Political Powersharing",
+      "type": "level"
+    },
+    "Terps": {
+      "meaning": "Territorial powersharing",
+      "type": "level"
+    },
+    "Eps": {
+      "meaning": "Economic powersharing",
+      "type": "level"
+    },
+    "Mps": {
+      "meaning": "Military powersharing",
+      "type": "level"
+    }
+  },
+  "Human rights and equality": {
+    "HrGen": {
+      "meaning": "Human Rights/Rule of law",
+      "type": "binary"
+    },
+    "EqGen": {
+      "meaning": "Equality",
+      "type": "level"
+    }
+  }
+}
