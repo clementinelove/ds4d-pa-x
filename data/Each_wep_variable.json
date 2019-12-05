@@ -1,0 +1,204 @@
+{
+    "World Development Indicators from the World Bank(WDI)":{
+        "area_WDI": {
+            "meaning": "Surface area" 
+        },
+         "area_land_WDI": {
+            "meaning": "Land area" 
+        },
+        "armed_WDI":{
+            "meaning": "Armed forces personnel,total"
+        },
+        "deaths_bt_WDI":{
+            "meaning": "Battle_related deaths(number of people)"
+        },
+        "debt_cgov_WDI":{
+            "meaning": "Central government debt,total (% of GDP)"
+        },
+        "ex_agri_WDI":{
+            "meaning": "Agricultural raw materials exports(% of merchandise exports)"
+        },
+        "ex_food_WDI":{
+            "meaning": "Food exports(% of merchandise exports)"
+        },
+        "ex_fuel_WDI":{
+            "meaning": "Fuel exports(% of merchandise exports)"
+        },
+        "ex_mfg_WDI":{
+            "meaning": "Manufactures exports(% of merchandise exports)"
+        },
+        "ex_oresmet_WDI":{
+            "meaning": "Ores and metal exports(% of merchandise exports)"
+        },
+        "exp_WDI":{
+            "meaning": "Exports of goods and services(% of GDP)"
+        },
+        "extdebt_WDI":{
+            "meaning": "External debt stocks (% of GNI)"
+        },
+        "extdebt_avgint_WDI":{
+            "meaning": "Average interest on new external debt commitments (%)"
+        },
+        "extdebt_avgintoff_WDI":{
+            "meaning": "Average interest on new external debt commitments, official (%)"
+        },
+        "extdebt_avgintpriv_WDI":{
+            "meaning": "Average interest on new external debt commitments, private (%)"
+        },
+        "extdebt_intpaygni_WDI":{
+            "meaning": "Interest payments on external debt (% of GNI)"
+        },
+        "extdebt_intpayperex_WDI":{
+            "meaning": "Interest payments on external debt (% exports and primary income)"
+        },
+        "extdebt_pv_WDI":{
+            "meaning": "Present value of external debt (current US$)"
+        },
+        "extdebt_tot_WDI":{
+            "meaning": "External debt stocks, total (DOD, current US$)"
+        },
+        "fdidollars_WDI":{
+            "meaning": "Foreign direct investment, net inflows (BoP, current US$)"
+        },
+        "fdi_inper_WDI":{
+            "meaning": "Foreign direct investment, net inflows (% of GDP)"
+        },
+        "fdi_outper_WDI":{
+            "meaning": "Foreign direct investment, net outflows (% of GDP)"
+        },
+        "gdp_WDI":{
+            "meaning": "GDP (constant 2010 US$)"
+        },
+        "growth_WDI":{
+            "meaning": "GDP growth (annual%)"
+        },
+        "gdppc_WDI":{
+            "meaning": "GDP per capita (constant 2010 US$)"
+        },
+        "gini_WDI":{
+            "meaning": "GINI index"
+        },
+        "gni_WDI":{
+            "meaning": "GNI (constant 2010 US$)"
+        },
+        "gnipc_WDI":{
+            "meaning": "GNI per capita (constant 2010 US$)"
+        },
+        "inf_mort_WDI":{
+            "meaning": "Mortality rate, infant (per 1000 live births)"
+        },
+        "inflation_WDI":{
+            "meaning": "Inflation, consumer prices (annual%)"
+        },
+        "insfin_svc_WDI":{
+            "meaning": "Insurance and financial services (% of commercial service exports)"
+        },
+        "internet_br_WDI":{
+            "meaning": "Fixed broadband Internet subscribers (per 100 people)"
+        },
+        "journal_WDI":{
+            "meaning": "Scientific and technical journal articles"
+        },
+        "legal_rt_WDI":{
+            "meaning": "Strength of legal rights index (0=weak to 12=strong)"
+        },
+        "lending_intrate_WDI":{
+            "meaning": "Lending interest rate (%)"
+        },
+        "life_exp_WDI":{
+            "meaning": "Life expectancy at birth, total (years)"
+        },
+        "lit_WDI":{
+            "meaning": "literacy rate, adult total (% of people ages 15 and above)"
+        },
+        "migrant_per_WDI":{
+            "meaning": "International migrant stock (% of population)"
+        },
+        "mobile_WDI":{
+            "meaning": "Mobile cellular subscriptions (per 100 people)"
+        },
+        "patapps_WDI":{
+            "meaning": "Patent applications, residents"
+        },
+        "pop_WDI":{
+            "meaning": "Population, total"
+        },
+        "pop_den_WDI":{
+            "meaning": "Population density (ppl per sq km of land area)"
+        },
+        "pop_urb_WDI":{
+            "meaning": "Urban population (% of total)"
+        },
+        "workingpop_WDI":{
+            "meaning": "Population ages 15-64 (% of total)"
+        },
+        "power_out_WDI":{
+            "meaning": "Power outages in firms in a typical month (number)"
+        },
+        "portfolio_WDI":{
+            "meaning": "Portfolio equity, net inflows (BoP, current US$)"
+        },
+        "reer_WDI":{
+            "meaning": "Real effective exchange rate index (2010 = 100)"
+        },
+        "remittances_WDI":{
+            "meaning": "Personal remittances, received (% of GDP)"
+        },
+        "reserves_im_WDI":{
+            "meaning": "Total reserves in months of imports"
+        },
+        "reserves_tot_WDI":{
+            "meaning": "Total reserves (includes gold, current US$)"
+        },
+        "rir_WDI":{
+            "meaning": "Real interest rate (%)"
+        },
+        "risk_prem_WDI":{
+            "meaning": "Risk premium on lending (lending rate minus treasury bill rate, %)"
+        },
+        "tax_rev_WDI":{
+            "meaning": "Tax revenue (% of GDP)"
+        },
+        "tech_rnd_WDI":{
+            "meaning": "Technicians in R&D (per million people)"
+        },
+        "tele_WDI":{
+            "meaning": "Telephone lines (per 100 people)"
+        },
+        "trade_WDI":{
+            "meaning": "Trade (% of GDP)"
+        },
+        "trade_services_WDI":{
+            "meaning": "Trade in services (% of GDP)"
+        },
+        "trdmk_apps_WDI":{
+            "meaning": "Trademark applications, total"
+        },
+        "natresource_rents_WDI":{
+            "meaning": "Total natural resources rents (% of GDP)"
+        },
+        "govt_consump_WDI":{
+            "meaning": "General government final consumption expenditure (% of GDP)"
+        },
+        "GNI_growth_WDI":{
+            "meaning": "GNI per capita growth (annual %)"
+        },
+        "capform_WDI":{
+            "meaning": "Gross fixed capital formation (% of GDP)"
+        },
+        "capformraw_WDI":{
+            "meaning": "Gross capital formation (constant 2010 US$)"
+        },
+        "govexp_edu_WDI":{
+            "meaning": "Government expenditure on education, total (% of GDP)"
+        },
+        "netoda_WDI":{
+            "meaning": "Net official development assistance received (current US$)"
+        },
+        "pop0_14_WDI":{
+            "meaning": "Population ages 0-14 (% of total)"
+        }
+
+    }
+
+}
