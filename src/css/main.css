@@ -24,6 +24,9 @@ body {
     background-color: #F3F1E5;
     /*background-color: #F3F1E5;*/
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     /*margin-top: 200px; !* TODO: modify page layout *!*/
 }
 
@@ -77,14 +80,14 @@ body {
     letter-spacing: 10px;
     /*font-family: 'Roboto Slab', serif;*/
     text-transform: uppercase;
-    font-size: 2vh;
+    font-size: 20px;
 }
 
 #agreementTitle {
     /*font-family: 'Roboto Slab', serif;*/
     font-family: 'Calistoga', cursive;
     width: 70%;
-    font-size: 3.5vh;
+    font-size: 40px;
     margin-top: 1vh;
     margin-bottom: 1vh;
     letter-spacing: 2px;
@@ -93,7 +96,7 @@ body {
 
 #info h2 {
     font-family: 'Noto Serif', serif;
-    font-size: 2vh;
+    font-size: 20px;
     letter-spacing: 3px;
 }
 
