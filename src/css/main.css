@@ -47,6 +47,22 @@ body {
     align-content: space-evenly;
 }
 
+#dropdownListsContainer a {
+    margin: 5px;
+    font-family: "Space Mono", monospace;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #015f9f;
+}
+
+#dropdownListsContainer a:hover {
+    margin: 5px;
+    font-family: "Space Mono", monospace;
+    text-transform: uppercase;
+    text-decoration: underline;
+    color: #015f9f;
+}
+
 .selection-box {
     margin: 5px;
     font-family: "Space Mono", monospace;
