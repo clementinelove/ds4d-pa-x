@@ -44,7 +44,7 @@ select {
 .select {
     display: inline-block;
 
-    background-color: #2a2a2a; /*select menu background color*/
+    background-color: #616161; /*select menu background color*/
     position: relative;
 }
 
