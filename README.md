@@ -4,6 +4,12 @@ This is a project related to the PA-X peace agreement database.
 ## DESIGN
 Who is your audience? Do you know enough about them? Would they be appealed by your solution?
 
+The audience of our project is someone working in the field of politics (such as politician) or interested in the peace agreements and history. 
+For some professionals, they engage in political activity as a profession and engages in political speculation and political power in order to meet the political needs of the group or individual. For them, it is difficult to find anything other than the peace agreement in the original data of PAX. Pax only provides the content and basic information of this treaty, such as the time of signing, agreement stage, etc. There is no way for these data to reflect it directly from the data, nor is there a way to understand what happened at this stage and what impact it had, so for politicians, just PAX database is not enough.
+For some unprofessionals, the pdf version of the peace agreement text is very difficult to read, and the encoded data only contains whether it mentions the issue or not, or some of agreements shows which degree the issue is (1/2/3). Therefore, these are not interesting for non-professionals, it is difficult to find useful information from the original data, and some technical terms are difficult to understand.
+
+
+
 What is your overall take-home message?
 
 What are the findings and facts you want to present to them?
