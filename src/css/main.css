@@ -23,8 +23,16 @@ body {
     /*margin-top: 200px; !* TODO: modify page layout *!*/
 }
 
+#dataSelectionAndDetails {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
 #dropdownListsContainer {
-    width: 70%;
+    /*width: 70%;*/
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -45,7 +53,7 @@ body {
 }
 
 #info {
-    margin: auto;
+    margin: 2vh;
     display: block;
     width: 70%;
     font: 15px sans-serif;

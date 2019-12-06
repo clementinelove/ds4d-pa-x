@@ -8,7 +8,38 @@
     <script src="src/js/lib/d3.min.js"></script>
 </head>
 <body>
-<div id="dropdownListsContainer"></div>
+<div id="dataSelectionAndDetails">
+    <div id="dropdownListsContainer">
+        <div class="selection-box">
+            <div>Country</div>
+            <div class="select" id="countryDropdownList">
+
+            </div>
+        </div>
+
+        <div class="selection-box">
+            <div>PA-X Variable</div>
+            <div class="select" id="paxDropdownList">
+
+            </div>
+        </div>
+    </div>
+
+    <div id="info">
+        <h1 id="peaceProcessName"></h1>
+        <h1 id="agreementTitle"></h1>
+        <h2 id="signedDate"></h2>
+        <h2 id="status"></h2>
+        <h2 id="agreementType"></h2>
+    </div>
+</div>
+
+<div id="svgContainer">
+    <div id="svgWrapper">
+
+    </div>
+</div>
+
 <div id="footer">
     <!-- Contents to be added -->
 </div>
@@ -22,7 +53,7 @@
 
     // INITIALIZE HTML AND SVG AREA
 
-    let margin = {top: 20, right: 20, bottom: 70, left: 20},
+    let margin = {top: 20, right: 20, bottom: 20, left: 20},
         width = 3000 - margin.left - margin.right,
         singleSideHeight = 300 - margin.top - margin.bottom,
         totalHeight = singleSideHeight * 2;
@@ -41,37 +72,10 @@
     let timelineScale = d3.scaleTime()
                           .range([0, width]);
 
-    let info = d3.select("body")
-                 .append("div")
-                 .attr("id", "info");
-
-    info.append("h1")
-        .attr("id", "peaceProcessName")
-        .text("");
-
-    info.append("h1")
-        .attr("id", "agreementTitle")
-        .text("");
-
-    info.append("h2")
-        .attr("id", "signedDate")
-        .text("");
-
-    info.append("h2")
-        .attr("id", "status")
-        .text("");
-
-    info.append("h2")
-        .attr("id", "agreementType")
-        .text("");
+    let info = d3.select("#info");
 
     // append SVG
-    let svg = d3.select("body")
-                .append("div")
-                .attr("id", "svgContainer")
-        // .style("height", totalHeight + "px")
-                .append("div")
-                .attr("id", "svgWrapper")
+    let svg = d3.select("#svgWrapper")
                 .append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", totalHeight + margin.top + margin.bottom)
@@ -87,9 +91,10 @@
     const TOP_LINE_COLOR = "#b06161";
     const BOTTOM_LINE_COLOR = "#686847";
 
-    let gwno = d3.csv("./data/gwno.csv");
-    let pax = d3.csv("./data/raw/pax_all_agreements_data.csv");
-    let wep = d3.csv("./data/raw/world_economics_politics.csv");
+    const gwno = d3.csv("./data/gwno.csv");
+    const pax = d3.csv("./data/raw/pax_all_agreements_data.csv");
+    const wep = d3.csv("./data/raw/world_economics_politics.csv");
+    const PAX_VARIABLE_DESC = d3.json("./data/paxVariable.json");
 
     let tooltipDiv;
 
@@ -156,20 +161,28 @@
         agreementKeys = Object.keys(d[0])
                               .filter(col => !(nonLinearFields.includes(col)));
 
-        // add pax attribute dropdown list
-        let paxSelectionBox = dropdownListContainer
-            .append("div")
-            .attr("class", "selection-box");
-
-        paxSelectionBox.append("div")
-                       .text("PA-X Variable");
-
-        let paxDropdownList = paxSelectionBox
-            .append("div")
-            .attr("class", "select")
-            .attr("id", "paxDropdownList")
-            .insert("select")
-            .on("change", paxColDropdownChanged);
+        // let paxDropDownList = dropdownListContainer.select("#paxDropdownList")
+        //                                            .insert("select")
+        //                                            .on("change", paxColDropdownChanged);
+        //
+        //
+        // // add pax attribute dropdown list
+        // let paxSelectionBox = dropdownListContainer
+        //     .append("div")
+        //     .attr("class", "selection-box");
+        //
+        // paxSelectionBox.append("div")
+        //                .text("PA-X Variable");
+        //
+        // let paxDropdownList = paxSelectionBox
+        //     .append("div")
+        //     .attr("class", "select")
+        //     .attr("id", "paxDropdownList")
+        //     .insert("select")
+        //     .on("change", paxColDropdownChanged);
+        let paxDropdownList = dropdownListContainer.select("#paxDropdownList")
+                                                   .insert("select")
+                                                   .on("change", paxColDropdownChanged);
 
         paxDropdownList.selectAll("option")
                        .data(agreementKeys)
@@ -332,21 +345,9 @@
     // generate country selection list
     gwno.then(data => {
 
-        // add country dropdown list
-        let countrySelectionBox = dropdownListContainer
-            .append("div")
-            .attr("class", "selection-box");
-
-        countrySelectionBox.append("div")
-                           .text("Country");
-
-        let countryDropdownList = countrySelectionBox
-            .append("div")
-            .attr("class", "select")
-            .attr("id", "countryDropdownList")
-            .insert("select")
-            .attr("class", "countryDropdownList")
-            .on("change", GWNOCodeDropdownChange);
+        let countryDropdownList = dropdownListContainer.select("#countryDropdownList")
+                                                       .insert("select")
+                                                       .on("change", GWNOCodeDropdownChange);
 
         countryDropdownList.selectAll("option")
                            .data(data)
@@ -391,10 +392,10 @@
 
         if (pos === LinePosition.TOP) {
             yScale = d3.scaleLinear()
-                       .range([singleSideHeight, margin.top + 50]);
+                       .range([singleSideHeight, margin.top]);
         } else if (pos === LinePosition.BOTTOM) {
             yScale = d3.scaleLinear()
-                       .range([singleSideHeight, totalHeight]);
+                       .range([singleSideHeight, totalHeight - margin.bottom]);
         } else {
             console.error("Invalid Position argument:" + pos)
         }
