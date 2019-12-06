@@ -23,7 +23,7 @@ Our team has Javascript and D3. Js programming skills. For one thing, we coded t
 Each member in the team has clear responsibilities. Weekly tasks were assigned to each member, and we had a group meeting at the ending of every week to talk about project progress and challenges. We worked independently. But if someone had problems when doing tasks, we put forward issues on the Gitlab, had a discussion withe members, and efficiently solved problems.
 
 
-REPORT:::
+## REPORT:::
 The PA-X Peace Agreement Database (www.peaceagreements.org) is a database that contains more than 1700 peace agreements, and it provides a comprehensive dataset of peace agreements from 1990 to 2019, it can be used for both quantitative and qualitative research. What’s more, it enables people to disaggregate the data by country, entity, region, conflict type, and stage of agreement, and search a group of agreements, and it allows examination of different combinations of issues addressed. 
 
 In PA-X, there are over 200 variables, such as human rights, economic power sharing and so on. In original data, for each peace agreement, there have data indicating whether it contains each variable, for example, speaking of human rights framework, this variable accounts for any provisions aiming to establish a human rights framework to guide the post-conflict period, e.g. by making provision for a bill of rights or for incorporation of human rights standards. If no such provisions appear in the agreement, the value on this variable is 0. When these provisions are found in the agreement, they are coded as follows:
