@@ -36,7 +36,13 @@ The audience of our project is someone working in the field of politics (such as
 
 Based on the database provided and the visualization project of last year, the data holder hopes to discover some things people might never thought about, and using a storytelling method, combined with illustrative timeline or map, to display a country's peace agreements. In order to solve these challenges, we combined our database with World Economics and Politics Dataverse (https://ncgg.princeton.edu/wep/dataverse.html), which concludes UCDP Armed Conflict dataset, global financial development database, 885 total variables include GDP, GINI index, estimate of annual battle fatalities. By combining with an external database, we can find more information under each peace agreement-related variable. For example, we can see if the agreement has an effect on the GDP of that period, or can choose the exact variables, like the total population, World Development Indicators, etc. By comparing directly with the peace agreement of this period, professional politicians and non-professionals can find more useful information.
 
-(加上网页介绍)
+Our exploratory website, taking time as the thread, gives people comprehensive perspectives to explore peace agreements with different categories in different countries, to probe into the relationship between peace agreement data and world development indicators(from World Economics and Politics Dataverse).
+
+When the audience first open the website, they will see the timeline which ranges from 1990 to 2019, and four drop-down options, whose are respectively ‘Country’, ‘Issues in peace process’, ‘World Development Indicator Top Line’ and ‘World Development Indicator Bottom Line’. 
+
+People can see rectangles representing different agreements on the timeline choose one country one issue. Click one rectangle, detailed information including when the agreement was signed or agreed,   what the agreement status is and what the conflict type is are displayed on the website.
+
+Also, people can choose two ‘World Development Indicators’ for top line and bottom line. Different countries have different trend during the given year. People can try to explore the relationship between agreements and two lines, which is a way for them to get interesting insights and tell stories.
 
 However, our website is based on a timeline and uses one country to display data, we lack a summary of the entire data set, so we decided to use flipbook to display our overall data, which is data visualization of the trend of peace agreements over time. As for the flipbook, its appearance is similar to the physical peace agreement, also it can show the changes in the data. Moreover, it can also use funny comics to introduce the peace agreement signing process to everyone.
 
