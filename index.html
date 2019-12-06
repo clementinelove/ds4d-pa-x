@@ -9,25 +9,46 @@
 </head>
 <body>
 <div id="dataSelectionAndDetails">
+    <div class="tooltip">
+        <div id="tooltip-title"></div>
+        <div id="tooltip-value"></div>
+    </div>
+
     <div id="dropdownListsContainer">
+
         <div class="selection-box">
-            <div>Country</div>
+            <div class="box-title">Country</div>
             <div class="select" id="countryDropdownList">
-
             </div>
         </div>
 
         <div class="selection-box">
-            <div>PA-X Variable</div>
+            <div class="box-title">PA-X Variable</div>
             <div class="select" id="paxDropdownList">
+            </div>
+        </div>
+
+        <div class="selection-box">
+            <div class="box-title">PAX Category</div>
+            <div class="select" id="paxCatDropdownList">
+            </div>
+        </div>
+
+        <div class="selection-box">
+            <div class="box-title">PAX Sub Category</div>
+            <div class="select" id="paxSubCatDropdownList">
 
             </div>
         </div>
+
+        <!-- Two more d3 generated selection-box here ... -->
+
     </div>
 
     <div id="info">
         <h1 id="peaceProcessName"></h1>
         <h1 id="agreementTitle"></h1>
+        <!--        <h2 id="levelOfDetail"></h2>-->
         <h2 id="signedDate"></h2>
         <h2 id="status"></h2>
         <h2 id="agreementType"></h2>
@@ -95,6 +116,7 @@
     const pax = d3.csv("./data/raw/pax_all_agreements_data.csv");
     const wep = d3.csv("./data/raw/world_economics_politics.csv");
     const PAX_VARIABLE_DESC = d3.json("./data/paxVariable.json");
+    // const WEP_VARIABLE_DESC = d3.json("./data/wepVariable.json");
 
     let tooltipDiv;
 
@@ -130,9 +152,7 @@
         //                     .attr("transform", "rotate(-65)");
 
         // Define the div for the tooltip
-        tooltipDiv = d3.select("body")
-                       .append("div")
-                       .attr("class", "tooltip")
+        tooltipDiv = d3.select(".tooltip")
                        .style("opacity", 0);
 
         // ===============================================================================================================
@@ -147,6 +167,78 @@
         // );
     }
 
+    PAX_VARIABLE_DESC.then(d => {
+        const CATEGORIES = Object.keys(d);
+
+        let subCategoryDropdownList = dropdownListContainer.select("#paxSubCatDropdownList")
+                                                           .insert("select")
+                                                           .on("change", paxSubCatDropdownChanged);
+
+        let categoryDropdownList = dropdownListContainer.select("#paxCatDropdownList")
+                                                        .insert("select")
+                                                        .on("change", paxCatDropdownChanged);
+
+        categoryDropdownList.selectAll("option")
+                            .data(CATEGORIES)
+                            .enter()
+                            .append("option")
+                            .attr("value", d => d)
+                            .text(d => d);
+
+        d3.select("#paxSubCatDropdownList select").disabled = true;
+
+        // run when the page loaded
+        paxCatDropdownChanged();
+        paxSubCatDropdownChanged();
+
+        function paxCatDropdownChanged() {
+            const PAX_CAT_KEY = getPAXCatValue();
+            const SUBCAT_KEYS = Object.keys(d[PAX_CAT_KEY]);
+            subCategoryDropdownList.selectAll("option")
+                                   .remove();
+            subCategoryDropdownList.selectAll("option")
+                                   .data(SUBCAT_KEYS)
+                                   .enter()
+                                   .append("option")
+                                   .attr("value", subCatKey => subCatKey)
+                                   .text(subCatKey => d[PAX_CAT_KEY][subCatKey]["meaning"]);
+        }
+
+        function paxSubCatDropdownChanged() {
+            const PAX_SUBCAT_KEY = getPAXSubCatValue();
+            const GWNO_CODE = getGWNOValue();
+
+            let filteredAgreements = filterAgreementsByGWNO(agreements, GWNO_CODE);
+
+            // TODO: if the key refers to a binary type value, use circle for transition
+            d3.selectAll(".agreementMark")
+              .data(filteredAgreements)
+              .transition()
+              .duration(500)
+              .style("fill", d => {
+                  let colorValue = d[PAX_SUBCAT_KEY];
+                  if (colorValue == 0) {
+                      return "rgba(124,128,125,0.66)"
+                  } else if (colorValue == 1) {
+                      return "#62A399"
+                  } else if (colorValue == 2) {
+                      return "#BE8675"
+                  } else if (colorValue == 3) {
+                      return "#993F3B"
+                  }
+              })
+              .attr("height", 90);
+        }
+
+        // subCategoryDropdownList.selectAll("option")
+        //                     .data(CATEGORIES)
+        //                     .enter()
+        //                     .append("option")
+        //                     .attr("value", d => d)
+        //                     .text(d => d);
+
+    });
+
     pax.then(d => {
         const nonLinearFields = ['Con', 'Contp', 'PP', 'PPName', 'Reg', 'AgtId', 'Agt', 'Dat', 'Status',
             'Lgt', 'N_characters', 'Agtp', 'Stage', 'StageSub', 'Part', 'ThrdPart', 'OthAgr',
@@ -156,30 +248,12 @@
         d.forEach(d => {
             d.Dat = paxParseDate(d.Dat); // replace date string with processable date objects
         });
+
         agreements = d;
         timelineScale.domain(d3.extent(d, d => d.Dat));
         agreementKeys = Object.keys(d[0])
                               .filter(col => !(nonLinearFields.includes(col)));
 
-        // let paxDropDownList = dropdownListContainer.select("#paxDropdownList")
-        //                                            .insert("select")
-        //                                            .on("change", paxColDropdownChanged);
-        //
-        //
-        // // add pax attribute dropdown list
-        // let paxSelectionBox = dropdownListContainer
-        //     .append("div")
-        //     .attr("class", "selection-box");
-        //
-        // paxSelectionBox.append("div")
-        //                .text("PA-X Variable");
-        //
-        // let paxDropdownList = paxSelectionBox
-        //     .append("div")
-        //     .attr("class", "select")
-        //     .attr("id", "paxDropdownList")
-        //     .insert("select")
-        //     .on("change", paxColDropdownChanged);
         let paxDropdownList = dropdownListContainer.select("#paxDropdownList")
                                                    .insert("select")
                                                    .on("change", paxColDropdownChanged);
@@ -254,6 +328,7 @@
                 .attr("class", "selection-box");
 
             selectionBox.append("div")
+                        .attr("class", "box-title")
                         .text("WEP " + capitalize(pos) + " Line");
 
             let dropdownList = selectionBox
@@ -334,6 +409,16 @@
 
     function getPAXValue() {
         return d3.select("#paxDropdownList select")
+                 .property('value');
+    }
+
+    function getPAXCatValue() {
+        return d3.select("#paxCatDropdownList select")
+                 .property('value');
+    }
+
+    function getPAXSubCatValue() {
+        return d3.select("#paxSubCatDropdownList select")
                  .property('value');
     }
 
@@ -454,18 +539,14 @@
                                .style("opacity", .2)
                                .style("fill", "white")
                                .attr("r", MOUSE_OUT_CIRCLE_RADIUS);
+                             const TOOLTIP_TITLE = tooltipDiv.select("#tooltip-title");
+                             const TOOLTIP_VALUE = tooltipDiv.select("#tooltip-value");
                              tooltipDiv.transition()
                                        .duration(200)
                                        .style("opacity", .9);
-                             tooltipDiv.html(
-                                 "<h6 class='title'>"
-                                 + wepFormatTime(d.year)
-                                 + "</h6>"
-                                 + " "
-                                 + col
-                                 + "<br/>"
-                                 + d[col])
-                                       .style("left", (d3.event.pageX) + "px")
+                             TOOLTIP_TITLE.text("Value at " + wepFormatTime(d.year) + ": ");
+                             TOOLTIP_VALUE.text(d[col]);
+                             tooltipDiv.style("left", (d3.event.pageX) + "px")
                                        .style("top", (d3.event.pageY - 28) + "px");
                          })
                          .on("mouseout", function (d) {
@@ -530,7 +611,7 @@
                   .text(formatAgtp(d.Agtp));
 
                 d3.select("#signedDate")
-                  .html("Signed/Agreed on " + paxFormatTime(d.Dat) + '<sup><a href="https://google.com">*</a></sup>');
+                  .html("Signed/Agreed on " + paxFormatTime(d.Dat));
 
                 rect.transition()
                     .duration(200)

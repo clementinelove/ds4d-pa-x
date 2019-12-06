@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Noto+Serif|Calistoga|Nanum+Gothic|Roboto+Slab|Oxygen+Mono|Space+Mono&display=swap');
 
 div.tooltip {
-    font-family: 'Oxygen Mono', monospace;
+    font-family: 'Space Mono', monospace;
     position: absolute;
     text-align: left;
     /*width: 100px;*/
@@ -14,6 +14,10 @@ div.tooltip {
     border: 0px;
     /*border-radius: 8px;*/
     pointer-events: none;
+}
+
+div.tooltip div {
+    display: inline-block;
 }
 
 body {
@@ -42,6 +46,12 @@ body {
 
 .selection-box {
     margin: 5px;
+    font-family: "Space Mono", monospace;
+}
+
+.box-title {
+    /*font-family: "Space Mono", monospace;*/
+    text-transform: uppercase;
 }
 
 #wepTopDropdownList {
