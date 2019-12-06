@@ -83,7 +83,8 @@ body {
 #agreementTitle {
     /*font-family: 'Roboto Slab', serif;*/
     font-family: 'Calistoga', cursive;
-    font-size: 4vh;
+    width: 70%;
+    font-size: 3.5vh;
     margin-top: 1vh;
     margin-bottom: 1vh;
     letter-spacing: 2px;
@@ -94,6 +95,16 @@ body {
     font-family: 'Noto Serif', serif;
     font-size: 2vh;
     letter-spacing: 3px;
+}
+
+#levelOfDetail {
+    display: inline-block;
+    font-family: "Nanum Gothic", sans-serif;
+    /*background-color: #D85A78;*/
+    color: #ffffff;
+    border: 10px solid rgba(0, 0, 0, 0);
+    border-radius: 5px;
+    text-transform: uppercase;
 }
 
 #signedDate {
@@ -135,7 +146,7 @@ svg {
 
 #timeline text {
     font-family: 'Space Mono', monospace;
-    font-size: 3vh;
+    font-size: 20px;
     opacity: 0.3;
     z-index: 1;
     pointer-events: none;

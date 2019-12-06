@@ -23,12 +23,6 @@
         </div>
 
         <div class="selection-box">
-            <div class="box-title">PA-X Variable</div>
-            <div class="select" id="paxDropdownList">
-            </div>
-        </div>
-
-        <div class="selection-box">
             <div class="box-title">PAX Category</div>
             <div class="select" id="paxCatDropdownList">
             </div>
@@ -48,7 +42,7 @@
     <div id="info">
         <h1 id="peaceProcessName"></h1>
         <h1 id="agreementTitle"></h1>
-        <!--        <h2 id="levelOfDetail"></h2>-->
+        <h2 id="levelOfDetail"></h2>
         <h2 id="signedDate"></h2>
         <h2 id="status"></h2>
         <h2 id="agreementType"></h2>
@@ -125,6 +119,7 @@
 
     let agreements;
     let agreementKeys;
+    let paxVariableDictionary;
 
     const LinePosition = {
         TOP: "top",
@@ -168,6 +163,7 @@
     }
 
     PAX_VARIABLE_DESC.then(d => {
+        paxVariableDictionary = d;
         const CATEGORIES = Object.keys(d);
 
         let subCategoryDropdownList = dropdownListContainer.select("#paxSubCatDropdownList")
@@ -218,13 +214,13 @@
               .style("fill", d => {
                   let colorValue = d[PAX_SUBCAT_KEY];
                   if (colorValue == 0) {
-                      return "rgba(124,128,125,0.66)"
+                      return "rgba(200,200,172, 0.7)"
                   } else if (colorValue == 1) {
-                      return "#62A399"
+                      return "rgba(193,165,156, 0.7)"
                   } else if (colorValue == 2) {
-                      return "#BE8675"
+                      return "rgba(203,132,138, 0.7)"
                   } else if (colorValue == 3) {
-                      return "#993F3B"
+                      return "rgba(216,90,120, 0.7)"
                   }
               })
               .attr("height", 90);
@@ -238,6 +234,18 @@
         //                     .text(d => d);
 
     });
+
+    function valueToColor(colorValue) {
+        if (colorValue == 0) {
+            return "rgba(200,200,172)"
+        } else if (colorValue == 1) {
+            return "rgba(193,165,156)"
+        } else if (colorValue == 2) {
+            return "rgba(203,132,138)"
+        } else if (colorValue == 3) {
+            return "rgba(216,90,120)"
+        }
+    }
 
     pax.then(d => {
         const nonLinearFields = ['Con', 'Contp', 'PP', 'PPName', 'Reg', 'AgtId', 'Agt', 'Dat', 'Status',
@@ -254,45 +262,6 @@
         agreementKeys = Object.keys(d[0])
                               .filter(col => !(nonLinearFields.includes(col)));
 
-        let paxDropdownList = dropdownListContainer.select("#paxDropdownList")
-                                                   .insert("select")
-                                                   .on("change", paxColDropdownChanged);
-
-        paxDropdownList.selectAll("option")
-                       .data(agreementKeys)
-                       .enter()
-                       .append("option")
-                       .attr("value", d => d)
-                       .text(d => d);
-
-        function paxColDropdownChanged() {
-
-            const SELECTED_PAX_COL = getPAXValue();
-            const GWNO_CODE = getGWNOValue();
-
-            let filteredAgreements = filterAgreementsByGWNO(agreements, GWNO_CODE);
-            //
-            // d3.selectAll('rect')
-            //   .data(filteredAgreements);
-
-            d3.selectAll(".agreementMark")
-              .data(filteredAgreements)
-              .transition()
-              .duration(500)
-              .style("fill", d => {
-                  let colorValue = d[SELECTED_PAX_COL];
-                  if (colorValue == 0) {
-                      return "rgba(124,128,125,0.66)"
-                  } else if (colorValue == 1) {
-                      return "#62A399"
-                  } else if (colorValue == 2) {
-                      return "#BE8675"
-                  } else if (colorValue == 3) {
-                      return "#993F3B"
-                  }
-              })
-              .attr("height", 90);
-        }
 
         initializeWEP();
     });
@@ -587,6 +556,47 @@
 
                 d3.select("#agreementTitle")
                   .text(d.Agt);
+
+                // TODO: GET Level of detail
+                let matchedEntry = paxVariableDictionary[getPAXCatValue()][getPAXSubCatValue()];
+                let type = matchedEntry["type"];
+                console.log(type);
+                let meaning = matchedEntry["meaning"];
+                let value = parseInt(d[getPAXSubCatValue()]);
+                console.log(value);
+
+                let prefix = "";
+                if (type === "binary") {
+                    switch (value) {
+                        case 0:
+                            prefix = "Not Related to";
+                            break;
+                        case 1:
+                            prefix = "Related to";
+                            break;
+                    }
+                } else {
+                    switch (value) {
+                        case 0:
+                            prefix = "Did not mention";
+                            break;
+                        case 1:
+                            prefix = "Mentioned";
+                            break;
+                        case 2:
+                            prefix = "Contains provisions on";
+                            break;
+                        case 3:
+                            prefix = "Providing Implementation Details on issues related to";
+                            break;
+                    }
+                }
+
+
+                d3.select("#levelOfDetail")
+                  .text(prefix + " " + meaning)
+                  .style("background-color", valueToColor(value))
+                  .style("border-color", valueToColor(value));
 
                 d3.select("#status")
                   .text(d.Status);
