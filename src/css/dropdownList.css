@@ -1,0 +1,182 @@
+/*
+
+MIT License
+
+Copyright (c) 2017 - 2019
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
+
+
+/**
+ * Styles for the wrapping element and
+ * the custom down arrow / background
+ */
+select {
+    border-radius: 0; /* may change, but start consistently */
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: normal;
+    margin: 0;
+    overflow: visible; /* show overflow in Edge */
+    text-transform: none; /* remove inheritance Edge, Firefox, IE */
+}
+
+.select {
+    display: inline-block;
+
+    background-color: #2a2a2a; /*select menu background color*/
+    position: relative;
+}
+
+.select:after,
+.select:before {
+    bottom: 0;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+}
+
+.select:before {
+    right: 0;
+    width: 1.85em;
+}
+
+.select:after {
+    border-bottom: 2px solid #fff;
+    border-right: 2px solid #fff;
+    height: .5em;
+    margin: auto;
+    right: .75em;
+    /*transform-origin: center right;*/
+    transform: rotate(45deg);
+    width: .5em;
+    z-index: 2;
+}
+
+.select:focus-within:before {
+    background-color: #015f9f;
+}
+
+/**
+ * Target only select elements that are
+ * child elements of the custom style.
+ * These styles could really mess up other
+ * selects that aren't within the parent wrapper.
+ */
+.select select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    border: 1px solid #000;
+    color: #fff;
+    line-height: normal;
+    max-width: 100%;
+    padding: .75em 2em .75em .75em;
+    width: auto;
+}
+
+/*.select select:focus-visible*/
+.select select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #fff;
+}
+
+.select select:focus {
+    border-color: #015f9f;
+    box-shadow: inset 0 0 0 1px #015f9f, 0 0 0 2px #015f9f;
+    outline: none;
+}
+
+.select select:disabled {
+    color: rgba(255, 255, 255, .75);
+    cursor: not-allowed;
+    opacity: .75;
+}
+
+.select select:invalid {
+    background: darkred;
+}
+
+/* firefox will change the background of options to
+   match the select's background. */
+.select select:invalid option {
+    background: lightgrey;
+}
+
+/**
+ * 1. remove background focus style from IE11 while keeping
+ *    focus style available on option elements
+ * 2. remove the default down arrow in IE/Edge
+ */
+.select select::-ms-value {
+    background: transparent; /* 1 */
+}
+
+.select select::-ms-expand {
+    display: none; /* 2 */
+}
+
+
+/**
+ * Child elements of the select
+ */
+.select select:focus option:not(:disabled),
+.select select:focus optgroup:not(:disabled) {
+    color: #111;
+    text-shadow: none;
+}
+
+.select option:disabled,
+.select optgroup:disabled {
+    color: rgba(50, 50, 50, .75);
+}
+
+
+/**
+ * Support for rtl text, explicit support for Arabic and Hebrew
+ * credit: https://twitter.com/aardrian/status/1075587790656675840
+ */
+[dir="rtl"] .select:before,
+:root:lang(ar) .select:before,
+:root:lang(iw) .select:before {
+    left: 0;
+    right: auto;
+}
+
+[dir="rtl"] .select:after,
+:root:lang(ar) .select:after,
+:root:lang(iw) .select:after {
+    left: .5em;
+    right: auto;
+}
+
+
+[dir="rtl"] .select select,
+:root:lang(ar) .select select,
+:root:lang(iw) .select select {
+    padding: .75em .75em .75em 2em;
+}

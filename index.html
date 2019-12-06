@@ -4,13 +4,22 @@
     <meta charset="UTF-8">
     <title>PA-X &amp; WEP Dataverse </title>
     <link rel="stylesheet" type="text/css" href="./src/css/main.css">
-    <link href="https://fonts.googleapis.com/css?family=Noto+Serif|Calistoga|Nanum+Gothic|Roboto+Slab|Oxygen+Mono|Space+Mono&display=swap"
-          rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./src/css/dropdownList.css">
     <script src="src/js/lib/d3.min.js"></script>
 </head>
 <body>
+<div id="dropdownListsContainer"></div>
+<div id="footer">
+    <!-- Contents to be added -->
+</div>
 </body>
 <script>
+    function capitalize(str) {
+        return str.charAt(0)
+                  .toUpperCase() + str.substring(1)
+    }
+
+
     // INITIALIZE HTML AND SVG AREA
 
     let margin = {top: 20, right: 20, bottom: 70, left: 20},
@@ -70,13 +79,17 @@
                 .attr("transform",
                     "translate(" + margin.left + "," + margin.top + ")");
 
+    let dropdownListContainer = d3.select("#dropdownListsContainer")
+
     // INITIALIZE DATA  ---------------------------------------------------------------------------
 
     // Note: pax data needs to be sort already
+    const TOP_LINE_COLOR = "#b06161";
+    const BOTTOM_LINE_COLOR = "#686847";
+
     let gwno = d3.csv("./data/gwno.csv");
     let pax = d3.csv("./data/raw/pax_all_agreements_data.csv");
     let wep = d3.csv("./data/raw/world_economics_politics.csv");
-
 
     let tooltipDiv;
 
@@ -105,11 +118,11 @@
                                         .call(xAxis.ticks(d3.timeYear.every(1)));
 
         // TODO: remove after zooming implemented
-        timelineAxisSelector.selectAll("text")
-                            .style("text-anchor", "end")
-                            .attr("dx", "1em")
-                            .attr("dy", "0em")
-                            .attr("transform", "rotate(-65)");
+        // timelineAxisSelector.selectAll("text")
+        //                     .style("text-anchor", "end")
+        //                     .attr("dx", "1em")
+        //                     .attr("dy", "0em")
+        //                     .attr("transform", "rotate(-65)");
 
         // Define the div for the tooltip
         tooltipDiv = d3.select("body")
@@ -144,10 +157,19 @@
                               .filter(col => !(nonLinearFields.includes(col)));
 
         // add pax attribute dropdown list
-        let paxDropdownList = d3.select("body")
-                                .insert("select")
-                                .attr("id", "paxDropdownList")
-                                .on("change", paxColDropdownChanged);
+        let paxSelectionBox = dropdownListContainer
+            .append("div")
+            .attr("class", "selection-box");
+
+        paxSelectionBox.append("div")
+                       .text("PA-X Variable");
+
+        let paxDropdownList = paxSelectionBox
+            .append("div")
+            .attr("class", "select")
+            .attr("id", "paxDropdownList")
+            .insert("select")
+            .on("change", paxColDropdownChanged);
 
         paxDropdownList.selectAll("option")
                        .data(agreementKeys)
@@ -214,15 +236,25 @@
 
         function defineDataColSelectionDropdownList(pos) {
             // add wep attribute dropdown list
-            let dropdownList = d3.select("body")
-                                 .insert("select")
-                                 .attr("class", "dataLineDropdownList " + pos)
-                                 .on("change", () => {
-                                     clearLinePlotsByPosition(pos);
-                                     console.log("CLEAR: " + pos);
-                                     drawDataLine(getGWNOValue(), getWEPColValue(pos), pos);
-                                     console.log("DRAW: " + pos);
-                                 });
+            let selectionBox = dropdownListContainer
+                .append("div")
+                .attr("class", "selection-box");
+
+            selectionBox.append("div")
+                        .text("WEP " + capitalize(pos) + " Line");
+
+            let dropdownList = selectionBox
+                .append("div")
+                .attr("class", "select")
+                .attr("id", "wep" + capitalize(pos) + "DropdownList")
+                .insert("select")
+                .attr("class", "dataLineDropdownList " + pos)
+                .on("change", () => {
+                    clearLinePlotsByPosition(pos);
+                    console.log("CLEAR: " + pos);
+                    drawDataLine(getGWNOValue(), getWEPColValue(pos), pos);
+                    console.log("DRAW: " + pos);
+                });
 
             dropdownList.selectAll("option")
                         .data(wepKeys)
@@ -283,12 +315,12 @@
     }
 
     function getGWNOValue() {
-        return d3.select("#countryDropdownList")
+        return d3.select("#countryDropdownList select")
                  .property('value');
     }
 
     function getPAXValue() {
-        return d3.select("#paxDropdownList")
+        return d3.select("#paxDropdownList select")
                  .property('value');
     }
 
@@ -301,11 +333,20 @@
     gwno.then(data => {
 
         // add country dropdown list
-        let countryDropdownList = d3.select("body")
-                                    .insert("select")
-                                    .attr("id", "countryDropdownList")
-                                    .attr("class", "countryDropdownList")
-                                    .on("change", GWNOCodeDropdownChange);
+        let countrySelectionBox = dropdownListContainer
+            .append("div")
+            .attr("class", "selection-box");
+
+        countrySelectionBox.append("div")
+                           .text("Country");
+
+        let countryDropdownList = countrySelectionBox
+            .append("div")
+            .attr("class", "select")
+            .attr("id", "countryDropdownList")
+            .insert("select")
+            .attr("class", "countryDropdownList")
+            .on("change", GWNOCodeDropdownChange);
 
         countryDropdownList.selectAll("option")
                            .data(data)
@@ -358,7 +399,9 @@
             console.error("Invalid Position argument:" + pos)
         }
 
-        yScale.domain([0, d3.max(filteredData, function (d) {
+        yScale.domain([d3.min(filteredData, function (d) {
+            return d[col];
+        }), d3.max(filteredData, function (d) {
             return d[col];
         })]);
 
@@ -383,9 +426,9 @@
                       .style("opacity", 1);
 
         if (pos === LinePosition.TOP) {
-            path.style("stroke", "#b06161")
+            path.style("stroke", TOP_LINE_COLOR)
         } else if (pos === LinePosition.BOTTOM) {
-            path.style("stroke", "#686847");
+            path.style("stroke", BOTTOM_LINE_COLOR);
         } else {
             console.error("Invalid Position argument")
         }
@@ -450,7 +493,7 @@
 
     function drawAgreementsOnAxis(agreementsToDraw) {
         agreementsToDraw.forEach(d => {
-            let agreementBarWidth = 7;
+            const AGREEMENT_MARK_WIDTH = 5;
             let mouseOutAgreementBarHeight = 50;
             let mouseOverAgreementBarHeight = 130;
 
@@ -507,7 +550,7 @@
                           .attr("x", timelineScale(d.Dat))
                           .attr("y", singleSideHeight - 10)
                           .style("opacity", 0.5)
-                          .attr("width", agreementBarWidth)
+                          .attr("width", AGREEMENT_MARK_WIDTH)
                           .attr("height", 0);
 
             rect.transition()
@@ -516,7 +559,6 @@
         });
 
     }
-
 
 </script>
 </html>
